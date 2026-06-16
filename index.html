@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Scan — MEDCMU Social Media Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --red: #C8102E;
+    --red-dark: #9E0B22;
+    --navy: #1A1F36;
+    --navy-light: #252A45;
+    --bg: #F5F6FA;
+    --card: #FFFFFF;
+    --text: #1A1F36;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --green: #10B981;
+    --orange: #F59E0B;
+    --blue: #3B82F6;
+    --purple: #8B5CF6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sarabun', 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--navy);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    background: var(--red); color: #fff; font-weight: 800; font-size: 15px;
+    padding: 6px 14px; border-radius: 8px; letter-spacing: 0.5px;
+  }
+  .header-title { color: #fff; font-weight: 600; font-size: 16px; opacity: 0.9; }
+  .header-sub { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .update-btn {
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+    padding: 7px 16px; border-radius: 8px; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .update-btn:hover { background: rgba(255,255,255,0.2); }
+  #csvFileInput { display: none; }
+  .last-update { color: rgba(255,255,255,0.45); font-size: 12px; }
+
+  /* ─── MAIN ─── */
+  .main { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .section-accent { width: 4px; height: 24px; background: var(--red); border-radius: 2px; }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── MONTH TABS ─── */
+  .month-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; background: var(--card);
+    border-radius: 12px; padding: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .month-tabs { display: flex; gap: 4px; }
+  .month-tab {
+    padding: 8px 22px; border-radius: 8px; border: none; background: transparent;
+    font-family: inherit; font-size: 14px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; transition: all 0.18s;
+  }
+  .month-tab:hover { background: var(--bg); color: var(--text); }
+  .month-tab.active { background: var(--red); color: #fff; font-weight: 600; }
+  .month-label { font-size: 12px; color: var(--text-muted); padding-right: 8px; }
+
+  /* ─── SCORE CARDS ─── */
+  .brand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .brand-card {
+    background: var(--card); border-radius: 16px; padding: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-top: 4px solid transparent;
+    transition: box-shadow 0.2s; position: relative; overflow: hidden;
+  }
+  .brand-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .brand-card.highlight { border-top-color: var(--red); }
+  .brand-card::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 80px; height: 80px; border-radius: 50%;
+    opacity: 0.04; background: currentColor; transform: translate(20px, -20px);
+  }
+  .brand-avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 12px;
+  }
+  .brand-name { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  .brand-full { font-size: 11px; color: var(--text-muted); opacity: 0.7; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .score-main { font-size: 42px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .score-change { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .score-change.up { color: var(--green); }
+  .score-change.down { color: #EF4444; }
+  .score-change.flat { color: var(--text-muted); }
+  .score-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+  .sub-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sub-score-item { }
+  .sub-score-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .sub-score-val { font-size: 18px; font-weight: 700; }
+  .sub-score-chg { font-size: 11px; font-weight: 600; }
+  .sub-score-chg.up { color: var(--green); }
+  .sub-score-chg.down { color: #EF4444; }
+  .sub-score-chg.flat { color: var(--text-muted); }
+
+  /* Brand colors */
+  .c-medcmu { color: #C8102E; }
+  .c-cu { color: #3B82F6; }
+  .c-si { color: #8B5CF6; }
+  .c-samitivej { color: #10B981; }
+  .bg-medcmu { background: #C8102E; }
+  .bg-cu { background: #3B82F6; }
+  .bg-si { background: #8B5CF6; }
+  .bg-samitivej { background: #10B981; }
+  .border-medcmu { border-top-color: #C8102E !important; }
+  .border-cu { border-top-color: #3B82F6 !important; }
+  .border-si { border-top-color: #8B5CF6 !important; }
+  .border-samitivej { border-top-color: #10B981 !important; }
+
+  /* ─── CHARTS ROW ─── */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-card {
+    background: var(--card); border-radius: 16px; padding: 22px 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* ─── FACEBOOK TABLE ─── */
+  .fb-card {
+    background: var(--card); border-radius: 16px; padding: 22px 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 28px;
+  }
+  .fb-table { width: 100%; border-collapse: collapse; }
+  .fb-table th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted); font-weight: 600; padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .fb-table th:not(:first-child) { text-align: right; }
+  .fb-table td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .fb-table td:not(:first-child) { text-align: right; font-weight: 600; }
+  .fb-table tr:last-child td { border-bottom: none; }
+  .fb-table tr:hover td { background: var(--bg); }
+  .brand-pill {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px;
+  }
+  .brand-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .change-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px; margin-left: 4px;
+  }
+  .change-badge.up { color: var(--green); background: #D1FAE5; }
+  .change-badge.down { color: #EF4444; background: #FEE2E2; }
+  .change-badge.flat { color: var(--text-muted); background: var(--bg); }
+
+  /* ─── TOP POSTS ─── */
+  .posts-section { margin-bottom: 28px; }
+  .posts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .post-card {
+    background: var(--card); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06); transition: box-shadow 0.2s;
+  }
+  .post-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .post-img-wrap { position: relative; padding-top: 56%; background: var(--bg); overflow: hidden; }
+  .post-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .post-img-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 32px; background: linear-gradient(135deg, #f5f6fa, #e9eaf0);
+  }
+  .post-rank {
+    position: absolute; top: 10px; left: 10px; background: var(--red);
+    color: #fff; width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .post-brand-badge {
+    position: absolute; top: 10px; right: 10px;
+    color: #fff; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+  }
+  .post-body { padding: 14px; }
+  .post-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .post-msg { font-size: 13px; line-height: 1.5; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .post-eng { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; font-weight: 700; }
+  .post-eng-icon { font-size: 14px; }
+  .post-eng-label { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+
+  /* ─── SENTIMENT BAR ─── */
+  .sentiment-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .sentiment-card { background: var(--card); border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .sentiment-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+  .sentiment-brand { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .sentiment-bar-wrap { background: var(--bg); border-radius: 8px; height: 8px; overflow: hidden; }
+  .sentiment-bar-fill { height: 100%; border-radius: 8px; transition: width 0.6s ease; }
+  .sentiment-val { font-size: 24px; font-weight: 800; margin-top: 8px; }
+  .sentiment-chg { font-size: 12px; font-weight: 600; }
+
+  /* ─── FOOTER ─── */
+  .footer { text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+  /* ─── UPLOAD TOAST ─── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; background: var(--navy);
+    color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 999;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 4px solid var(--green); }
+  .toast.error { border-left: 4px solid #EF4444; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .brand-grid { grid-template-columns: repeat(2, 1fr); }
+    .posts-grid { grid-template-columns: repeat(2, 1fr); }
+    .sentiment-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .charts-row { grid-template-columns: 1fr; }
+    .brand-grid { grid-template-columns: 1fr; }
+    .posts-grid { grid-template-columns: 1fr; }
+    .sentiment-row { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">Brand Scan</div>
+    <div>
+      <div class="header-title">MEDCMU Social Media Dashboard</div>
+      <div class="header-sub">Powered by Wisesight Brand Scan · 2026</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="last-update" id="lastUpdate">ข้อมูล: Jan – Apr 2026</span>
+    <button class="update-btn" onclick="document.getElementById('csvFileInput').click()">
+      ⬆ อัพโหลด CSV ใหม่
+    </button>
+    <input type="file" id="csvFileInput" accept=".csv" multiple onchange="handleCSVUpload(event)">
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Month Tabs -->
+  <div class="month-bar">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="month-label">📅 เลือกเดือน:</span>
+      <div class="month-tabs" id="monthTabs">
+        <button class="month-tab" data-month="Jan" onclick="selectMonth('Jan')">มกราคม</button>
+        <button class="month-tab" data-month="Feb" onclick="selectMonth('Feb')">กุมภาพันธ์</button>
+        <button class="month-tab" data-month="Mar" onclick="selectMonth('Mar')">มีนาคม</button>
+        <button class="month-tab active" data-month="Apr" onclick="selectMonth('Apr')">เมษายน</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);">คลิกเดือนเพื่อเปรียบเทียบ Social Metric Score</div>
+  </div>
+
+  <!-- Social Metric Score Cards -->
+  <div class="section-header">
+    <div class="section-accent"></div>
+    <div>
+      <div class="section-title">Social Metric Score</div>
+      <div class="section-sub">คะแนนรวมทุก dimension — Owned · Earned · Sentiment</div>
+    </div>
+  </div>
+  <div class="brand-grid" id="brandCards"></div>
+
+  <!-- Sentiment Bars -->
+  <div class="section-header">
+    <div class="section-accent"></div>
+    <div>
+      <div class="section-title">Sentiment Score</div>
+      <div class="section-sub">อัตราส่วน Positive ต่อ Total Mentions</div>
+    </div>
+  </div>
+  <div class="sentiment-row" id="sentimentRow"></div>
+
+  <!-- Trend Charts -->
+  <div class="section-header">
+    <div class="section-accent"></div>
+    <div>
+      <div class="section-title">แนวโน้มรายเดือน</div>
+      <div class="section-sub">Jan – Apr 2026</div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Brand Score Trend</div>
+      <div class="chart-sub">เปรียบเทียบคะแนนรวม 4 แบรนด์</div>
+      <div class="chart-wrap"><canvas id="brandScoreChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Total Engagement Trend (Facebook)</div>
+      <div class="chart-sub">ยอด Engagement รวม Owned + Earned</div>
+      <div class="chart-wrap"><canvas id="engagementChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Facebook Summary Table -->
+  <div class="section-header">
+    <div class="section-accent"></div>
+    <div>
+      <div class="section-title">Facebook Summary</div>
+      <div class="section-sub">ผู้ติดตาม · โพสต์ · Engagement รายเดือนที่เลือก</div>
+    </div>
+  </div>
+  <div class="fb-card">
+    <table class="fb-table" id="fbTable">
+      <thead>
+        <tr>
+          <th>แบรนด์</th>
+          <th>ผู้ติดตาม (Followers)</th>
+          <th>เปลี่ยนแปลง</th>
+          <th>โพสต์ทั้งหมด</th>
+          <th>Total Engagement</th>
+          <th>Total Posts (รวม)</th>
+          <th>Daily Messages</th>
+        </tr>
+      </thead>
+      <tbody id="fbTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Top Posts -->
+  <div class="section-header">
+    <div class="section-accent"></div>
+    <div>
+      <div class="section-title">Top Posts เดือนที่เลือก</div>
+      <div class="section-sub">โพสต์ที่มี Engagement สูงสุดจากทุกแบรนด์</div>
+    </div>
+  </div>
+  <div class="posts-grid" id="topPostsGrid"></div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>Brand Scan</strong> by Wisesight &nbsp;·&nbsp; คณะแพทยศาสตร์ มหาวิทยาลัยเชียงใหม่ &nbsp;·&nbsp;
+  Data: Jan–Apr 2026 &nbsp;·&nbsp;
+  <span id="footerNote">อัพโหลด CSV ใหม่เพื่อขยายข้อมูล</span>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  EMBEDDED DATA (อัพเดทได้จาก CSV)
+// ══════════════════════════════════════════════════════════════
+const BRANDS = [
+  { key: 'MedCMU',   label: 'MedCMU',   full: 'คณะแพทยศาสตร์ มช.',       abbr: 'A', cls: 'medcmu'   },
+  { key: 'จุฬาฯ',   label: 'จุฬาฯ',    full: 'รพ.จุฬาลงกรณ์ สภากาชาด',  abbr: 'B', cls: 'cu'       },
+  { key: 'ศิริราช',  label: 'ศิริราช',  full: 'คณะแพทยศาสตร์ศิริราช',    abbr: 'C', cls: 'si'       },
+  { key: 'สมิติเวช', label: 'สมิติเวช', full: 'โรงพยาบาลสมิติเวช',        abbr: 'D', cls: 'samitivej'},
+];
+
+const COLORS = {
+  MedCMU:   '#C8102E',
+  'จุฬาฯ':  '#3B82F6',
+  'ศิริราช': '#8B5CF6',
+  'สมิติเวช':'#10B981',
+};
+
+let DATA = {
+  MedCMU: {
+    Jan: { brand_score:'99',  brand_score_change:'0.0%',  owned_score:'111', owned_score_change:'0.0%',  earned_score:'76',  earned_score_change:'0.0%',  sentiment:'44.8%', sentiment_change:'0.0%',  total_posts:'414',   daily_messages:'286',   total_engagement:'190,254'   },
+    Feb: { brand_score:'122', brand_score_change:'23.2%', owned_score:'139', owned_score_change:'25.2%', earned_score:'90',  earned_score_change:'18.4%', sentiment:'45.5%', sentiment_change:'1.6%',  total_posts:'820',   daily_messages:'563',   total_engagement:'388,707'   },
+    Mar: { brand_score:'150', brand_score_change:'23%',   owned_score:'174', owned_score_change:'25.2%', earned_score:'106', earned_score_change:'17.8%', sentiment:'45.2%', sentiment_change:'-0.7%', total_posts:'1,142', daily_messages:'912',   total_engagement:'595,626'   },
+    Apr: { brand_score:'182', brand_score_change:'21.3%', owned_score:'219', owned_score_change:'25.9%', earned_score:'114', earned_score_change:'7.5%',  sentiment:'43.1%', sentiment_change:'-4.6%', total_posts:'1,558', daily_messages:'1,199', total_engagement:'1,293,798' },
+  },
+  'จุฬาฯ': {
+    Jan: { brand_score:'89',  brand_score_change:'0.0%',  owned_score:'56',  owned_score_change:'0.0%',  earned_score:'151', earned_score_change:'0.0%',  sentiment:'45.8%', sentiment_change:'0.0%',  total_posts:'93',  daily_messages:'1,265', total_engagement:'17,898' },
+    Feb: { brand_score:'104', brand_score_change:'16.9%', owned_score:'65',  owned_score_change:'16.1%', earned_score:'176', earned_score_change:'16.6%', sentiment:'45.4%', sentiment_change:'-0.9%', total_posts:'184', daily_messages:'2,528', total_engagement:'32,297' },
+    Mar: { brand_score:'119', brand_score_change:'14.4%', owned_score:'79',  owned_score_change:'21.5%', earned_score:'194', earned_score_change:'10.2%', sentiment:'44.2%', sentiment_change:'-2.6%', total_posts:'301', daily_messages:'3,714', total_engagement:'58,843' },
+    Apr: { brand_score:'130', brand_score_change:'9.2%',  owned_score:'86',  owned_score_change:'8.9%',  earned_score:'212', earned_score_change:'9.3%',  sentiment:'44.1%', sentiment_change:'-0.2%', total_posts:'394', daily_messages:'4,760', total_engagement:'77,374' },
+  },
+  'ศิริราช': {
+    Jan: { brand_score:'79',  brand_score_change:'0.0%',  owned_score:'48',  owned_score_change:'0.0%',  earned_score:'137', earned_score_change:'0.0%',  sentiment:'38.6%', sentiment_change:'0.0%', total_posts:'100', daily_messages:'1,516', total_engagement:'17,568' },
+    Feb: { brand_score:'107', brand_score_change:'35.4%', owned_score:'75',  owned_score_change:'56.3%', earned_score:'167', earned_score_change:'21.9%', sentiment:'41.4%', sentiment_change:'7.3%', total_posts:'200', daily_messages:'2,897', total_engagement:'60,198' },
+    Mar: { brand_score:'124', brand_score_change:'15.9%', owned_score:'87',  owned_score_change:'16%',   earned_score:'191', earned_score_change:'14.4%', sentiment:'43.7%', sentiment_change:'5.6%', total_posts:'315', daily_messages:'4,475', total_engagement:'73,879' },
+    Apr: { brand_score:'141', brand_score_change:'13.7%', owned_score:'104', owned_score_change:'19.5%', earned_score:'211', earned_score_change:'10.5%', sentiment:'47.1%', sentiment_change:'7.8%', total_posts:'460', daily_messages:'6,090', total_engagement:'116,211' },
+  },
+  'สมิติเวช': {
+    Jan: { brand_score:'105', brand_score_change:'0.0%',  owned_score:'100', owned_score_change:'0.0%',  earned_score:'116', earned_score_change:'0.0%',  sentiment:'52.5%', sentiment_change:'0.0%',  total_posts:'87',  daily_messages:'397',   total_engagement:'181,563' },
+    Feb: { brand_score:'129', brand_score_change:'22.9%', owned_score:'126', owned_score_change:'26%',   earned_score:'134', earned_score_change:'15.5%', sentiment:'48.5%', sentiment_change:'-7.6%', total_posts:'176', daily_messages:'694',   total_engagement:'296,541' },
+    Mar: { brand_score:'140', brand_score_change:'8.5%',  owned_score:'135', owned_score_change:'7.1%',  earned_score:'149', earned_score_change:'11.2%', sentiment:'51.7%', sentiment_change:'6.6%',  total_posts:'261', daily_messages:'1,088', total_engagement:'438,316' },
+    Apr: { brand_score:'154', brand_score_change:'10%',   owned_score:'145', owned_score_change:'7.4%',  earned_score:'171', earned_score_change:'14.8%', sentiment:'55.1%', sentiment_change:'6.6%',  total_posts:'340', daily_messages:'1,516', total_engagement:'533,664' },
+  },
+};
+
+let FB_DATA = {
+  MedCMU:    { Jan:{followers:'0',followers_change:'0.0%',total_posts_fb:'255',total_engagement_fb:'135,511'}, Feb:{followers:'155,161',followers_change:'3.8%',total_posts_fb:'478',total_engagement_fb:'240,147'}, Mar:{followers:'161,123',followers_change:'8.3%',total_posts_fb:'640',total_engagement_fb:'330,761'}, Apr:{followers:'174,511',followers_change:'5.6%',total_posts_fb:'837',total_engagement_fb:'552,130'} },
+  'จุฬาฯ':  { Jan:{followers:'0',followers_change:'0.0%',total_posts_fb:'51',total_engagement_fb:'16,115'},   Feb:{followers:'214,209',followers_change:'0.4%',total_posts_fb:'97',total_engagement_fb:'27,959'},    Mar:{followers:'214,977',followers_change:'1.1%',total_posts_fb:'154',total_engagement_fb:'48,133'},   Apr:{followers:'217,325',followers_change:'0.6%',total_posts_fb:'203',total_engagement_fb:'63,802'} },
+  'ศิริราช': { Jan:{followers:'0',followers_change:'0.0%',total_posts_fb:'63',total_engagement_fb:'15,895'},   Feb:{followers:'263,951',followers_change:'0.2%',total_posts_fb:'128',total_engagement_fb:'50,194'},   Mar:{followers:'264,528',followers_change:'0.1%',total_posts_fb:'201',total_engagement_fb:'60,617'},   Apr:{followers:'264,740',followers_change:'0.6%',total_posts_fb:'284',total_engagement_fb:'93,566'} },
+  'สมิติเวช':{ Jan:{followers:'0',followers_change:'0.0%',total_posts_fb:'33',total_engagement_fb:'46,989'},   Feb:{followers:'297,872',followers_change:'-0.1%',total_posts_fb:'68',total_engagement_fb:'78,904'},  Mar:{followers:'297,509',followers_change:'0%',total_posts_fb:'101',total_engagement_fb:'111,763'},   Apr:{followers:'297,604',followers_change:'0.1%',total_posts_fb:'135',total_engagement_fb:'131,717'} },
+};
+
+let TOP_POSTS = {
+  MedCMU: {
+    Jan:[{rank:1,date:'02 Jan 2026',engagement:'33,600',message:'"คุณูปการที่ไม่มีวันลืม" อาจารย์ใหญ่ ในความทรงจำของนักศึกษาแพทย์ คณะแพทยศาสตร์ มช. #อาจารย์ใหญ่',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/02/original_facebook_190910644280633_1331289308801978_101890577.jpg?width=256'},{rank:2,date:'27 Jan 2026',engagement:'11,230',message:'คณบดีคณะแพทยศาสตร์ 3 สถาบัน (มช. มข. ม.อ.) การประชุมแลกเปลี่ยนเรียนรู้ คณะแพทยศาสตร์ส่วนภูมิภาค 3 สถาบัน',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/27/original_facebook_190910644280633_1350349746895934_111195111.jpg?width=256'},{rank:3,date:'29 Jan 2026',engagement:'5,451',message:'เมื่อ 3 คณบดีคณะแพทยศาสตร์ ส่วนภูมิภาค มารวมตัวกัน มาโชว์สกิลภาษาถิ่นกันหน่อย',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/29/original_facebook_190910644280633_1352084650055777_131530584.jpg?width=256'}],
+    Apr:[{rank:1,date:'02 Apr 2026',engagement:'40,139',message:'"หัวใจผู้ให้" ในครอบครัวสวนดอก...พนักงานบริการฝีมือ (ด้านวิทยาศาสตร์การแพทย์) ฝ่ายเวชศาสตร์ฟื้นฟู',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/02/original_facebook_190910644280633_1403882258209349_138250267.jpg?width=256'},{rank:2,date:'09 Apr 2026',engagement:'37,514',message:'🩺✨เมื่อคุณหมอเจอคนไข้ "คนเมืองตัวจริง" คุณหมอจะรับมือไหวไหม ไปดูกัน! #กำเมือง #MedCMU',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/09/original_facebook_190910644280633_1409418797655695_132635327.jpg?width=256'},{rank:3,date:'02 Apr 2026',engagement:'23,802',message:'"สดุดีผู้ให้ด้วยใจกุศล" คุณสุพัตรา บุญตุ้ย พนักงานบริการฝีมือ ด้านวิทยาศาสตร์การแพทย์',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/02/original_facebook_190910644280633_1403882258209349_138250267.jpg?width=256'}],
+  },
+  'จุฬาฯ': {
+    Jan:[{rank:1,date:'19 Jan 2026',engagement:'2,397',message:'🕊️ จากหัวใจที่ทุ่มเทเพื่อการดูแลผู้อื่น… สู่เกียรติยศอันทรงคุณค่าแห่งงานพยาบาล ขอแสดงความยินดีแด่ พว.อรทัย ธนาวินิจเจริญ',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/19/original_facebook_387038794672333_889248590526103_173172558.jpg?width=256'},{rank:2,date:'07 Jan 2026',engagement:'1,290',message:'🌻 เปิดแล้ววันนี้ "ทุ่งทานตะวัน" รมณียสถานภายในโรงพยาบาล ที่ชวนให้ทุกคนแวะมาเยี่ยมชม ถ่ายภาพ',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/07/original_facebook_387038794672333_880273128090316_100847781.jpg?width=256'},{rank:3,date:'07 Jan 2026',engagement:'1,191',message:'ภาพบรรยากาศกิจกรรมเก็บพืชผักสวนครัวจากชาวสวน 🌱 "ปลูกด้วยรัก ดูแลด้วยใจ"',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/01/07/original_facebook_387038794672333_880069441444018_149106106.jpg?width=256'}],
+    Apr:[{rank:1,date:'04 Apr 2026',engagement:'4,128',message:'รู้สเต็ป…ไม่รู้หน้า 💃✨ เต้นตามได้ทุกท่า แต่เดาไม่ออกว่า "ตัวจริงทำอาชีพอะไร"',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/04/original_facebook_387038794672333_951800207604274_121164548.jpg?width=256'},{rank:2,date:'02 Apr 2026',engagement:'1,259',message:'โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย ยกระดับการดูแลสุขภาพ เพื่อผู้รับบริการทุกคน',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/02/original_facebook_387038794672333_949975874453374_109003503.jpg?width=256'},{rank:3,date:'29 Apr 2026',engagement:'584',message:'สุขภาพดี เริ่มต้นที่นี่ โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย พร้อมดูแลทุกท่าน',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/29/original_facebook_387038794672333_971949725589322_108441162.jpg?width=256'}],
+  },
+  'ศิริราช': {
+    Jan:[{rank:1,date:'Jan 2026',engagement:'15,000',message:'คณะแพทยศาสตร์ศิริราชพยาบาล ขอแสดงความยินดีกับนักศึกษาแพทย์ที่สำเร็จการศึกษา',img:null},{rank:2,date:'Jan 2026',engagement:'5,000',message:'138 ปี ศิริราช รากฐานแห่งการแพทย์ไทย',img:null},{rank:3,date:'Jan 2026',engagement:'3,000',message:'ความก้าวหน้าด้านนวัตกรรมการแพทย์ คณะแพทยศาสตร์ศิริราชพยาบาล',img:null}],
+    Apr:[{rank:1,date:'22 Apr 2026',engagement:'15,804',message:'ขอแสดงความยินดีกับ นายเสฏฐวุฒิ บัวดี นักศึกษาแพทย์ชั้นปีที่ 6 คณะแพทยศาสตร์ศิริราชพยาบาล ม.มหิดล',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/22/original_facebook_235091575521_1402187991956084_164832134.jpg?width=256'},{rank:2,date:'26 Apr 2026',engagement:'4,157',message:'๑๓๘ ปี โรงพยาบาลศิริราช "เห็นว่าแต่ลูกเราพิทักษ์รักษาเพียงนี้ยังได้ความทุกขเวทนา"',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/26/original_facebook_235091575521_1405333298308220_137225271.jpg?width=256'},{rank:3,date:'23 Apr 2026',engagement:'1,665',message:'๑๓๘ ปี พระราชทานกำเนิดโรงพยาบาลศิริราช โรงพยาบาลหลวงแห่งแรกของแผ่นดิน',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/23/original_facebook_235091575521_1402858278555722_171877806.jpg?width=256'}],
+  },
+  'สมิติเวช': {
+    Jan:[{rank:1,date:'Jan 2026',engagement:'5,000',message:'สมิติเวช 47 ปีที่อยู่เคียงข้างกัน มีเรื่องราวไหนของ "สมิติเวช สุขุมวิท" ที่อยู่ในความทรงจำ',img:null},{rank:2,date:'Jan 2026',engagement:'3,500',message:'บริการสุขภาพครบวงจร โรงพยาบาลสมิติเวช ดูแลคุณทุกขั้นตอน',img:null},{rank:3,date:'Jan 2026',engagement:'2,000',message:'เคล็ดลับสุขภาพดีจากผู้เชี่ยวชาญ โรงพยาบาลสมิติเวช',img:null}],
+    Apr:[{rank:1,date:'01 Apr 2026',engagement:'2,751',message:'47 ปีที่อยู่เคียงข้างกัน… มีเรื่องราวไหนของ "สมิติเวช สุขุมวิท" ที่อยู่ในความทรงจำ',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/01/original_facebook_113238002044013_1372887944882180_156888532.jpg?width=256'},{rank:2,date:'30 Apr 2026',engagement:'1,782',message:'โค้งสุดท้าย!! ร่วมเชียร์บุรีรัมย์ ยูไนเต็ด ให้ถึงแชมป์ สมิติเวชแจกเสื้อบุรีรัมย์',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/30/original_facebook_113238002044013_1397298722441102_156426723.jpg?width=256'},{rank:3,date:'29 Apr 2026',engagement:'1,328',message:'🏃‍♀️ คนรักการวิ่งต้องรู้! ระวัง 6 ปัญหาผิวที่นักวิ่งมักเจอ การวิ่งช่วยให้สุขภาพแข็งแรง',img:'https://s3-ap-southeast-1.amazonaws.com/wisesight-images/saai/th/2026/04/29/original_facebook_113238002044013_1374801761357465_128647483.jpg?width=256'}],
+  },
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let currentMonth = 'Apr';
+let chartBrandScore = null;
+let chartEngagement = null;
+const MONTHS = ['Jan','Feb','Mar','Apr'];
+const MONTH_TH = { Jan:'มกราคม', Feb:'กุมภาพันธ์', Mar:'มีนาคม', Apr:'เมษายน', May:'พฤษภาคม', Jun:'มิถุนายน', Jul:'กรกฎาคม', Aug:'สิงหาคม', Sep:'กันยายน', Oct:'ตุลาคม', Nov:'พฤศจิกายน', Dec:'ธันวาคม' };
+
+// ══════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════
+function changeClass(chg) {
+  if (!chg || chg === '0.0%' || chg === '0%') return 'flat';
+  return chg.startsWith('-') ? 'down' : 'up';
+}
+function changeArrow(chg) {
+  if (!chg || chg === '0.0%' || chg === '0%') return '—';
+  return chg.startsWith('-') ? '▼ ' + chg : '▲ ' + chg;
+}
+function numVal(s) {
+  if (!s) return 0;
+  return parseFloat(s.replace(/,/g,'').replace('%','')) || 0;
+}
+function fmtNum(n) {
+  return n.toLocaleString('th-TH');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER BRAND SCORE CARDS
+// ══════════════════════════════════════════════════════════════
+function renderBrandCards() {
+  const container = document.getElementById('brandCards');
+  container.innerHTML = BRANDS.map(b => {
+    const d = (DATA[b.key] || {})[currentMonth] || {};
+    const chg = d.brand_score_change || '0%';
+    const cc = changeClass(chg);
+    return `
+    <div class="brand-card border-${b.cls}">
+      <div class="brand-avatar bg-${b.cls}">${b.abbr}</div>
+      <div class="brand-name">${b.label}</div>
+      <div class="brand-full">${b.full}</div>
+      <div class="score-main c-${b.cls}">${d.brand_score || '—'}</div>
+      <div class="score-change ${cc}">${changeArrow(chg)}</div>
+      <hr class="score-divider">
+      <div class="sub-scores">
+        <div class="sub-score-item">
+          <div class="sub-score-label">Owned</div>
+          <div class="sub-score-val">${d.owned_score || '—'}</div>
+          <div class="sub-score-chg ${changeClass(d.owned_score_change)}">${changeArrow(d.owned_score_change)}</div>
+        </div>
+        <div class="sub-score-item">
+          <div class="sub-score-label">Earned</div>
+          <div class="sub-score-val">${d.earned_score || '—'}</div>
+          <div class="sub-score-chg ${changeClass(d.earned_score_change)}">${changeArrow(d.earned_score_change)}</div>
+        </div>
+        <div class="sub-score-item">
+          <div class="sub-score-label">Engagement</div>
+          <div class="sub-score-val" style="font-size:13px;">${d.total_engagement || '—'}</div>
+        </div>
+        <div class="sub-score-item">
+          <div class="sub-score-label">โพสต์รวม</div>
+          <div class="sub-score-val" style="font-size:13px;">${d.total_posts || '—'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER SENTIMENT
+// ══════════════════════════════════════════════════════════════
+function renderSentiment() {
+  const container = document.getElementById('sentimentRow');
+  container.innerHTML = BRANDS.map(b => {
+    const d = (DATA[b.key] || {})[currentMonth] || {};
+    const val = d.sentiment || '0%';
+    const pct = numVal(val);
+    const chg = d.sentiment_change || '0%';
+    const cc = changeClass(chg);
+    // Color: green if >50%, yellow if 40-50%, red if <40%
+    const barColor = pct >= 50 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
+    return `
+    <div class="sentiment-card">
+      <div class="sentiment-label">Positive Sentiment</div>
+      <div class="sentiment-brand c-${b.cls}">${b.label}</div>
+      <div class="sentiment-bar-wrap">
+        <div class="sentiment-bar-fill" style="width:${Math.min(pct,100)}%;background:${barColor};"></div>
+      </div>
+      <div class="sentiment-val" style="color:${barColor};">${val}</div>
+      <div class="sentiment-chg ${cc}">${changeArrow(chg)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER CHARTS
+// ══════════════════════════════════════════════════════════════
+function getAvailableMonths() {
+  // Return months that have data
+  const allMonths = Object.keys(MONTHS.reduce((a,m) => {a[m]=1; return a;}, {}));
+  // Actually collect unique months from data
+  const set = new Set();
+  Object.values(DATA).forEach(bd => Object.keys(bd).forEach(m => set.add(m)));
+  const order = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return order.filter(m => set.has(m));
+}
+
+function renderCharts() {
+  const months = getAvailableMonths();
+  const labels = months.map(m => MONTH_TH[m] || m);
+
+  // Brand Score chart
+  const bsDatasets = BRANDS.map(b => ({
+    label: b.label,
+    data: months.map(m => numVal((DATA[b.key]?.[m] || {}).brand_score)),
+    borderColor: COLORS[b.key],
+    backgroundColor: COLORS[b.key] + '18',
+    borderWidth: 2.5,
+    pointBackgroundColor: COLORS[b.key],
+    pointRadius: 5,
+    fill: false,
+    tension: 0.4,
+  }));
+
+  if (chartBrandScore) chartBrandScore.destroy();
+  chartBrandScore = new Chart(document.getElementById('brandScoreChart'), {
+    type: 'line',
+    data: { labels, datasets: bsDatasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } } },
+      scales: {
+        y: { beginAtZero: false, grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Engagement chart
+  const engDatasets = BRANDS.map(b => ({
+    label: b.label,
+    data: months.map(m => numVal((DATA[b.key]?.[m] || {}).total_engagement)),
+    borderColor: COLORS[b.key],
+    backgroundColor: COLORS[b.key] + '18',
+    borderWidth: 2.5,
+    pointBackgroundColor: COLORS[b.key],
+    pointRadius: 5,
+    fill: false,
+    tension: 0.4,
+  }));
+
+  if (chartEngagement) chartEngagement.destroy();
+  chartEngagement = new Chart(document.getElementById('engagementChart'), {
+    type: 'line',
+    data: { labels, datasets: engDatasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 }, callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER FACEBOOK TABLE
+// ══════════════════════════════════════════════════════════════
+function renderFbTable() {
+  const tbody = document.getElementById('fbTableBody');
+  const d = DATA;
+  tbody.innerHTML = BRANDS.map(b => {
+    const fb = (FB_DATA[b.key] || {})[currentMonth] || {};
+    const ov = (d[b.key] || {})[currentMonth] || {};
+    const follChg = fb.followers_change || '0%';
+    const cc = changeClass(follChg);
+    const followers = fb.followers === '0' ? '—' : fb.followers;
+    return `
+    <tr>
+      <td><div class="brand-pill"><span class="brand-dot" style="background:${COLORS[b.key]};"></span>${b.label} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">${b.full}</span></div></td>
+      <td>${followers || '—'}</td>
+      <td><span class="change-badge ${cc}">${changeArrow(follChg)}</span></td>
+      <td>${fb.total_posts_fb || '—'}</td>
+      <td>${fb.total_engagement_fb || '—'}</td>
+      <td>${ov.total_posts || '—'}</td>
+      <td>${ov.daily_messages || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER TOP POSTS
+// ══════════════════════════════════════════════════════════════
+function renderTopPosts() {
+  const grid = document.getElementById('topPostsGrid');
+  let allPosts = [];
+
+  BRANDS.forEach(b => {
+    const posts = (TOP_POSTS[b.key] || {})[currentMonth] || (TOP_POSTS[b.key] || {})['Apr'] || [];
+    posts.forEach(p => allPosts.push({ ...p, brand: b }));
+  });
+
+  // sort by engagement desc, take top 8
+  allPosts.sort((a, b) => numVal(b.engagement) - numVal(a.engagement));
+  const show = allPosts.slice(0, 8);
+
+  if (show.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">ไม่มีข้อมูล Top Posts สำหรับเดือนนี้</div>';
+    return;
+  }
+
+  grid.innerHTML = show.map((p, i) => {
+    const imgHtml = p.img && !p.img.includes('no-image')
+      ? `<img class="post-img" src="${p.img}" alt="post" onerror="this.parentElement.innerHTML='<div class=post-img-placeholder>🏥</div>'">`
+      : `<div class="post-img-placeholder">🏥</div>`;
+    return `
+    <div class="post-card">
+      <div class="post-img-wrap">
+        ${imgHtml}
+        <div class="post-rank">${i+1}</div>
+        <div class="post-brand-badge bg-${p.brand.cls}">${p.brand.label}</div>
+      </div>
+      <div class="post-body">
+        <div class="post-meta">📅 ${p.date}</div>
+        <div class="post-msg">${p.message || '—'}</div>
+        <div class="post-eng">
+          <span class="post-eng-icon">💬</span>
+          <span style="color:${COLORS[p.brand.key]}">${p.engagement}</span>
+          <span class="post-eng-label">engagement</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MONTH SELECTOR
+// ══════════════════════════════════════════════════════════════
+function selectMonth(m) {
+  currentMonth = m;
+  document.querySelectorAll('.month-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.month === m);
+  });
+  renderBrandCards();
+  renderSentiment();
+  renderFbTable();
+  renderTopPosts();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CSV UPLOAD & PARSE
+// ══════════════════════════════════════════════════════════════
+function handleCSVUpload(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+
+  let processed = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const result = parseCSV(text, file.name);
+      processed++;
+      if (result.type === 'data') {
+        showToast(`✅ โหลด ${file.name} สำเร็จ (${result.brand} · ${result.months.join(', ')})`, 'success');
+      } else if (result.type === 'posts') {
+        showToast(`✅ โหลด Posts ${file.name} สำเร็จ`, 'success');
+      } else {
+        showToast(`⚠️ ${file.name}: ไม่รู้จักรูปแบบ CSV`, 'error');
+      }
+      if (processed === files.length) {
+        // refresh all
+        updateMonthTabs();
+        renderBrandCards();
+        renderSentiment();
+        renderCharts();
+        renderFbTable();
+        renderTopPosts();
+        document.getElementById('lastUpdate').textContent = 'อัพเดท: ' + new Date().toLocaleDateString('th-TH');
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+  event.target.value = '';
+}
+
+function parseCSV(text, filename) {
+  // Remove BOM
+  text = text.replace(/^﻿/, '');
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return { type: 'unknown' };
+
+  const headers = parseCSVLine(lines[0]);
+  const rows = lines.slice(1).map(l => {
+    const vals = parseCSVLine(l);
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  }).filter(r => r.brand || r['brand']);
+
+  if (!rows.length) return { type: 'unknown' };
+
+  const firstRow = rows[0];
+  const brandRaw = firstRow.brand || firstRow['﻿brand'] || '';
+
+  // Detect brand key
+  let brandKey = null;
+  if (brandRaw.includes('เชียงใหม่') || brandRaw.includes('MedCMU') || filename.toLowerCase().includes('medcmu')) brandKey = 'MedCMU';
+  else if (brandRaw.includes('จุฬา') || filename.toLowerCase().includes('cu')) brandKey = 'จุฬาฯ';
+  else if (brandRaw.includes('ศิริราช') || filename.toLowerCase().includes('si')) brandKey = 'ศิริราช';
+  else if (brandRaw.includes('สมิติเวช') || filename.toLowerCase().includes('samitivej')) brandKey = 'สมิติเวช';
+
+  if (!brandKey) return { type: 'unknown' };
+
+  // Check if it's data file (has 'tab' column) or posts file
+  if (headers.includes('tab')) {
+    return parseDataCSV(rows, brandKey);
+  } else if (headers.includes('rank_in_month')) {
+    return parsePostsCSV(rows, brandKey);
+  }
+  return { type: 'unknown' };
+}
+
+function parseDataCSV(rows, brandKey) {
+  // Parse _data CSV format
+  if (!DATA[brandKey]) DATA[brandKey] = {};
+  if (!FB_DATA[brandKey]) FB_DATA[brandKey] = {};
+
+  const months = new Set();
+
+  rows.forEach(r => {
+    const month = r.month;
+    const tab = r.tab;
+    const section = r.section;
+    const itemType = r.item_type;
+    const item = r.item;
+    if (!month) return;
+    months.add(month);
+
+    if (tab === 'Overview') {
+      if (!DATA[brandKey][month]) DATA[brandKey][month] = {};
+      const d = DATA[brandKey][month];
+
+      if (section === 'Brand Score' && itemType === 'value') {
+        if (!d.brand_score) d.brand_score = item;
+        else if (!d.brand_score_change) d.brand_score_change = item;
+      }
+      if (section === 'Owned Score' && itemType === 'value') {
+        if (!d.owned_score) d.owned_score = item;
+        else if (!d.owned_score_change) d.owned_score_change = item;
+      }
+      if (section === 'Earned Score' && itemType === 'value') {
+        if (!d.earned_score) d.earned_score = item;
+        else if (!d.earned_score_change) d.earned_score_change = item;
+      }
+      if (section === 'Sentiment Score' && itemType === 'value') {
+        if (!d.sentiment) d.sentiment = item;
+        else if (!d.sentiment_change) d.sentiment_change = item;
+      }
+      if (section === 'Total Posts' && itemType === 'value' && !d.total_posts) d.total_posts = item;
+      if (section === 'Daily Unique Messages' && itemType === 'value' && !d.daily_messages) d.daily_messages = item;
+      if (section === 'Engagement Timeline' && itemType === 'value' && !d.total_engagement) d.total_engagement = item;
+    }
+
+    if (tab === 'Facebook') {
+      if (!FB_DATA[brandKey][month]) FB_DATA[brandKey][month] = {};
+      const fd = FB_DATA[brandKey][month];
+
+      if (section === 'Followers' && itemType === 'value') {
+        if (!fd.followers) fd.followers = item;
+        else if (!fd.followers_change) fd.followers_change = item;
+      }
+      if (section === 'Total post' && itemType === 'value') {
+        if (!fd.total_posts_fb) fd.total_posts_fb = item;
+        else if (!fd.total_engagement_fb) fd.total_engagement_fb = item;
+      }
+    }
+  });
+
+  return { type: 'data', brand: brandKey, months: [...months] };
+}
+
+function parsePostsCSV(rows, brandKey) {
+  if (!TOP_POSTS[brandKey]) TOP_POSTS[brandKey] = {};
+  const byMonth = {};
+
+  rows.forEach(r => {
+    const m = r.month;
+    if (!m) return;
+    if (!byMonth[m]) byMonth[m] = [];
+    if (r.platform === 'Facebook' && parseInt(r.rank_in_month) <= 5) {
+      byMonth[m].push({
+        rank: parseInt(r.rank_in_month),
+        date: r.date,
+        engagement: r.engagement,
+        message: r.message ? r.message.replace(/^"|"$/g, '') : '',
+        img: r.image_url || null,
+      });
+    }
+  });
+
+  Object.keys(byMonth).forEach(m => {
+    byMonth[m].sort((a, b) => a.rank - b.rank);
+    TOP_POSTS[brandKey][m] = byMonth[m];
+  });
+
+  return { type: 'posts', brand: brandKey };
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UPDATE MONTH TABS (when new months appear from CSV)
+// ══════════════════════════════════════════════════════════════
+function updateMonthTabs() {
+  const months = getAvailableMonths();
+  const container = document.getElementById('monthTabs');
+  container.innerHTML = months.map(m => `
+    <button class="month-tab ${m === currentMonth ? 'active' : ''}" data-month="${m}" onclick="selectMonth('${m}')">${MONTH_TH[m] || m}</button>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  renderBrandCards();
+  renderSentiment();
+  renderCharts();
+  renderFbTable();
+  renderTopPosts();
+});
+</script>
+</body>
+</html>
