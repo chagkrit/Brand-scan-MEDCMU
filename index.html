@@ -223,17 +223,97 @@
   .toast.error { border-left: 4px solid #EF4444; }
 
   /* ─── RESPONSIVE ─── */
+
+  /* Tablet landscape (≤1100px) */
   @media (max-width: 1100px) {
     .brand-grid { grid-template-columns: repeat(2, 1fr); }
     .posts-grid { grid-template-columns: repeat(2, 1fr); }
     .sentiment-row { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { gap: 16px; }
   }
-  @media (max-width: 700px) {
-    .charts-row { grid-template-columns: 1fr; }
-    .brand-grid { grid-template-columns: 1fr; }
-    .posts-grid { grid-template-columns: 1fr; }
-    .sentiment-row { grid-template-columns: 1fr; }
-    .main { padding: 16px; }
+
+  /* Tablet portrait (≤768px) */
+  @media (max-width: 768px) {
+    /* Header */
+    .header { padding: 0 16px; height: auto; min-height: 64px; flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+    .header-title { font-size: 14px; }
+    .header-sub { display: none; }
+    .header-right { gap: 8px; }
+    .last-update { font-size: 11px; }
+    .update-btn { padding: 6px 12px; font-size: 12px; }
+
+    /* Main */
+    .main { padding: 16px 14px; }
+
+    /* Month bar */
+    .month-bar { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px 12px; }
+    .month-tabs { flex-wrap: wrap; gap: 6px; }
+    .month-tab { padding: 7px 14px; font-size: 13px; }
+
+    /* Section */
+    .section-title { font-size: 16px; }
+
+    /* Charts */
+    .charts-row { grid-template-columns: 1fr; gap: 14px; }
+    .chart-wrap { height: 200px; }
+
+    /* Facebook table — horizontal scroll */
+    .fb-card { padding: 16px; overflow: hidden; }
+    .fb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .fb-table { min-width: 540px; }
+    .fb-table td, .fb-table th { padding: 10px 10px; font-size: 12px; }
+
+    /* Brand cards */
+    .brand-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .score-main { font-size: 34px; }
+
+    /* Sentiment */
+    .sentiment-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    /* Posts */
+    .posts-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  }
+
+  /* Mobile (≤480px) */
+  @media (max-width: 480px) {
+    /* Header */
+    .header { padding: 10px 12px; }
+    .header-logo { font-size: 13px; padding: 5px 10px; }
+    .header-title { font-size: 13px; }
+    .update-btn { font-size: 11px; padding: 5px 10px; }
+    .last-update { display: none; }
+
+    /* Main */
+    .main { padding: 12px 10px; }
+
+    /* Month bar */
+    .month-tab { padding: 6px 10px; font-size: 12px; }
+
+    /* Grids → single column */
+    .brand-grid { grid-template-columns: 1fr; gap: 10px; }
+    .posts-grid { grid-template-columns: 1fr; gap: 10px; }
+    .sentiment-row { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Brand cards */
+    .brand-card { padding: 16px; }
+    .score-main { font-size: 36px; }
+
+    /* Section header */
+    .section-header { margin-bottom: 14px; }
+    .section-title { font-size: 15px; }
+
+    /* Charts */
+    .chart-wrap { height: 180px; }
+    .chart-card { padding: 16px; }
+
+    /* FB table */
+    .fb-table { min-width: 480px; }
+
+    /* Footer */
+    .footer { font-size: 11px; padding: 18px 12px; }
+
+    /* Toast */
+    .toast { bottom: 12px; right: 12px; left: 12px; text-align: center; }
   }
 </style>
 </head>
@@ -324,6 +404,7 @@
     </div>
   </div>
   <div class="fb-card">
+    <div class="fb-table-wrap">
     <table class="fb-table" id="fbTable">
       <thead>
         <tr>
@@ -338,6 +419,7 @@
       </thead>
       <tbody id="fbTableBody"></tbody>
     </table>
+    </div>
   </div>
 
   <!-- Top Posts -->
