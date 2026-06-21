@@ -1,0 +1,8 @@
+*.csv
+.DS_Store
+__pycache__/
+.omx/
+*.temp
+*_temp.csv
+.presentation_workspace_path
+AGENTS.md
