@@ -2176,21 +2176,13 @@ const POST_PLAT_COLORS = {Facebook:'#1877F2',TikTok:'#000',Instagram:'#dc2743',Y
 
 function getPostsForPlatform(plat) {
   let allPosts = [];
-  if (plat === 'All' || plat === 'Facebook') {
+  const platList = plat === 'All' ? ['Facebook','TikTok','Instagram','YouTube','x'] : [plat];
+  platList.forEach(pl => {
     BRANDS.forEach(b => {
-      const posts = (TOP_POSTS[b.key] || {})[currentMonth] || [];
-      posts.forEach(p => allPosts.push({ ...p, brand: b, platform: 'Facebook' }));
+      const posts = ((TOP_POSTS_PLAT[b.key] || {})[currentMonth] || {})[pl] || [];
+      posts.forEach(p => allPosts.push({ ...p, brand: b, platform: pl }));
     });
-  }
-  if (plat !== 'Facebook') {
-    const platList = plat === 'All' ? ['TikTok','Instagram','YouTube','x'] : [plat];
-    platList.forEach(pl => {
-      BRANDS.forEach(b => {
-        const posts = ((TOP_POSTS_PLAT[b.key] || {})[currentMonth] || {})[pl] || [];
-        posts.forEach(p => allPosts.push({ ...p, brand: b, platform: pl }));
-      });
-    });
-  }
+  });
   return allPosts;
 }
 
