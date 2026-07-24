@@ -49,6 +49,24 @@ def first_two_values(rows, section_name):
     vals = [r['item'] for r in srows if r['item_type'] == 'value']
     return (vals[0] if vals else ''), (vals[1] if len(vals) > 1 else '0.0%')
 
+def regex_after_label(rows, label_regex):
+    """Fallback for malformed exports where a metric's value is merged into one
+    text/metric_or_label cell shortly after its label, instead of split into
+    separate value cells (seen in some brands' May 2026 export). Looks up to
+    3 rows ahead to skip intervening 'Owned'/'Earned' marker cells."""
+    for i, r in enumerate(rows):
+        if re.search(label_regex, r['item'], re.I):
+            for j in range(i + 1, min(i + 4, len(rows))):
+                m = re.match(r'^([\d,]+(?:\.\d+)?)\s*([+-]?[\d.]+%)?', rows[j]['item'])
+                if m: return m.group(1), (m.group(2) or '0.0%')
+    return None, None
+
+def regex_total_engagement(rows):
+    for r in rows:
+        m = re.search(r'Total engagement\s+([\d,]+)\s*([+-]?[\d.]+%)?', r['item'], re.I)
+        if m: return m.group(1)
+    return None
+
 def extract_overview(month_tabs):
     result = {}
     for month in MONTH_ORDER:
@@ -66,18 +84,27 @@ def extract_overview(month_tabs):
             srows = get_section_rows(rows, sec)
             vals = [r['item'] for r in srows if r['item_type'] == 'value']
             if vals: d['total_posts'] = vals[0]; break
+        if 'total_posts' not in d:
+            v, _ = regex_after_label(rows, r'^Total Posts$')
+            if v: d['total_posts'] = v
         v = first_value_after(rows,'Daily Unique Messages','total')
         if not v:
             srows = get_section_rows(rows,'Daily Unique Messages')
             vals = [r['item'] for r in srows if r['item_type'] == 'value']
             v = vals[0] if vals else ''
         if v: d['daily_messages'] = v
+        if 'daily_messages' not in d:
+            v, _ = regex_after_label(rows, r'^Daily Unique Messages$')
+            if v: d['daily_messages'] = v
         v = first_value_after(rows,'Engagement Timeline','total engagement')
         if not v:
             for sec in ['Total post','Total Posts','Total Post']:
                 v = first_value_after(rows, sec, 'total engagement')
                 if v: break
         if v: d['total_engagement'] = v
+        if 'total_engagement' not in d:
+            v = regex_total_engagement(rows)
+            if v: d['total_engagement'] = v
         if d: result[month] = d
     return result
 
