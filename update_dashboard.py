@@ -260,16 +260,16 @@ def build_posts_block(varname, decl, all_top, by_plat=False):
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 DATA_FILES = {
-    'MedCMU':   '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/MEDCMU_data2026.csv',
-    'จุฬาฯ':    '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/CU_data2026.csv',
-    'ศิริราช':  '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/SI_data2026.csv',
-    'สมิติเวช': '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/Samitivej_data2026.csv',
+    'MedCMU':   '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/MEDCMU_data2026.csv',
+    'จุฬาฯ':    '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/CU_data2026.csv',
+    'ศิริราช':  '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/SI_data2026.csv',
+    'สมิติเวช': '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/Samitivej_data2026.csv',
 }
 POST_FILES = {
-    'MedCMU':   '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/MEDCMU2026.csv',
-    'จุฬาฯ':    '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/CU2026.csv',
-    'ศิริราช':  '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/SI2026.csv',
-    'สมิติเวช': '/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/Samitivej2026.csv',
+    'MedCMU':   '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/MEDCMU2026.csv',
+    'จุฬาฯ':    '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/CU2026.csv',
+    'ศิริราช':  '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/SI2026.csv',
+    'สมิติเวช': '/Users/chagkrit/Library/CloudStorage/GoogleDrive-nansurg7@gmail.com/My Drive/04_งานแพทย์ & โรงพยาบาล/Social MEDCMU/MEDCMU DATA 2026/Samitivej2026.csv',
 }
 
 all_data, all_fb_data, all_platform_data = {}, {}, {}
@@ -297,7 +297,8 @@ blocks = {
 }
 
 # ─── Patch HTML ──────────────────────────────────────────────────────────────
-with open('/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/brand_scan_dashboard.html', encoding='utf-8') as f:
+DASHBOARD_PATH = __file__.rsplit('/', 1)[0] + '/brand_scan_dashboard.html'
+with open(DASHBOARD_PATH, encoding='utf-8') as f:
     html = f.read()
 
 def replace_block(html, start_pat, end_pat, new_block):
@@ -340,6 +341,6 @@ for var in ['DATA','FB_DATA','TOP_POSTS','PLATFORM_DATA','TOP_POSTS_PLAT']:
             if depth == 0: break
     print(f'{var}: {"OK" if depth == 0 else "BROKEN"}')
 
-with open('/sessions/optimistic-practical-brown/mnt/MEDCMU DATA 2026/brand_scan_dashboard.html', 'w', encoding='utf-8') as f:
+with open(DASHBOARD_PATH, 'w', encoding='utf-8') as f:
     f.write(html)
 print(f'\nSaved. Total chars: {len(html):,}')
