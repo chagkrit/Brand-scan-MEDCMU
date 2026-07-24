@@ -2,6 +2,9 @@ import csv, json, re
 from collections import defaultdict
 
 MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+MONTH_ALIASES = {'June':'Jun','July':'Jul','Sept':'Sep'}
+def norm_month(m):
+    return MONTH_ALIASES.get(m, m)
 PLAT_TEXT_MAP = {'facebook':'Facebook','Facebook':'Facebook','X':'x','x':'x','Twitter':'x',
                  'TikTok':'TikTok','tiktok':'TikTok','instagram':'Instagram','Instagram':'Instagram',
                  'YouTube':'YouTube','youtube':'YouTube'}
@@ -16,7 +19,7 @@ def parse_data_file(filepath):
     result = defaultdict(lambda: defaultdict(list))
     with open(filepath, encoding='utf-8-sig') as f:
         for row in csv.DictReader(f):
-            result[row['month']][row['tab']].append(row)
+            result[norm_month(row['month'])][row['tab']].append(row)
     for m in result:
         for t in result[m]:
             result[m][t].sort(key=lambda r: int(r['line_order']))
@@ -130,7 +133,7 @@ def parse_posts_csv(filepath):
     by_month_plat = defaultdict(lambda: defaultdict(list))
     with open(filepath, encoding='utf-8-sig') as f:
         for row in csv.DictReader(f):
-            m, pl = row.get('month',''), row.get('platform','')
+            m, pl = norm_month(row.get('month','')), row.get('platform','')
             if m in MONTH_ORDER and pl:
                 by_month_plat[m][pl].append(row)
     for m in by_month_plat:
