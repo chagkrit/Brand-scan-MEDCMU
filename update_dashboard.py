@@ -196,7 +196,13 @@ def parse_posts_csv(filepath):
     by_month_plat = defaultdict(lambda: defaultdict(list))
     with open(filepath, encoding='utf-8-sig') as f:
         for row in csv.DictReader(f):
-            m, pl = norm_month(row.get('month','')), row.get('platform','')
+            m = norm_month(row.get('month',''))
+            raw_pl = row.get('platform','')
+            # Keep platform keys aligned with Engagement By Channel. The
+            # Social Metric export uses both ``X`` and ``x`` in different
+            # blocks; without this normalization the dashboard creates two
+            # separate X rows and the July total appears split.
+            pl = PLAT_TEXT_MAP.get(raw_pl, PLAT_TEXT_MAP.get(raw_pl.casefold(), raw_pl))
             if m in MONTH_ORDER and pl:
                 by_month_plat[m][pl].append(row)
     for m in by_month_plat:
