@@ -136,6 +136,11 @@
   .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
   .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
   .chart-wrap { position: relative; height: 220px; }
+  .engagement-values-label { font-size: 11px; color: var(--text-muted); margin-top: 14px; }
+  .engagement-values { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+  .engagement-value { border-left: 3px solid var(--brand-color); padding: 2px 0 2px 7px; min-width: 0; }
+  .engagement-value-brand { color: var(--text-muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .engagement-value-number { color: var(--text); font-size: 15px; font-weight: 800; line-height: 1.25; }
 
   /* ─── FACEBOOK TABLE ─── */
   .fb-card {
@@ -256,6 +261,7 @@
     /* Charts */
     .charts-row { grid-template-columns: 1fr; gap: 14px; }
     .chart-wrap { height: 200px; }
+    .engagement-values { grid-template-columns: repeat(2, 1fr); }
 
     /* Facebook table — horizontal scroll */
     .fb-card { padding: 16px; overflow: hidden; }
@@ -442,6 +448,8 @@
       <div class="chart-title" id="engChartTitle">Total Engagement Trend</div>
       <div class="chart-sub" id="engChartSub">ยอด Engagement รวมทุก Platform</div>
       <div class="chart-wrap"><canvas id="engagementChart"></canvas></div>
+      <div class="engagement-values-label" id="engagementValuesLabel"></div>
+      <div class="engagement-values" id="engagementValues"></div>
     </div>
   </div>
 
@@ -947,205 +955,205 @@ const PLATFORM_DATA = {
   "MedCMU": {
     Jan: {
       "Facebook": { "total_posts": "100", "total_engagement": "135,511", "followers": "155,161" },
-      "x": { "total_posts": "38", "total_engagement": "119", "followers": "1,255" },
       "YouTube": { "total_posts": "40", "total_engagement": "780", "followers": "38,000", "views": "29,612" },
-      "Instagram": { "total_posts": "50", "total_engagement": "20,383", "followers": "12,948", "views": "371,922" },
+      "x": { "total_posts": "38", "total_engagement": "119", "followers": "1,255" },
       "TikTok": { "total_posts": "31", "total_engagement": "33,461", "followers": "58,400", "views": "565,815" },
+      "Instagram": { "total_posts": "50", "total_engagement": "20,383", "followers": "12,948", "views": "371,922" },
     },
     Feb: {
       "Facebook": { "total_posts": "100", "total_engagement": "104,636", "followers": "161,123" },
-      "x": { "total_posts": "53", "total_engagement": "166", "followers": "1,258" },
       "YouTube": { "total_posts": "30", "total_engagement": "376", "followers": "38,100", "views": "18,889" },
-      "Instagram": { "total_posts": "67", "total_engagement": "20,773", "followers": "13,291", "views": "277,457" },
+      "x": { "total_posts": "53", "total_engagement": "166", "followers": "1,258" },
       "TikTok": { "total_posts": "33", "total_engagement": "72,502", "followers": "59,834", "views": "875,211" },
+      "Instagram": { "total_posts": "67", "total_engagement": "20,773", "followers": "13,291", "views": "277,457" },
     },
     Mar: {
       "Facebook": { "total_posts": "100", "total_engagement": "90,614", "followers": "174,511" },
-      "x": { "total_posts": "66", "total_engagement": "58,781", "followers": "1,405" },
       "YouTube": { "total_posts": "34", "total_engagement": "562", "followers": "38,400", "views": "26,877" },
-      "Instagram": { "total_posts": "37", "total_engagement": "16,419", "followers": "13,774", "views": "268,270" },
+      "x": { "total_posts": "66", "total_engagement": "58,781", "followers": "1,405" },
       "TikTok": { "total_posts": "23", "total_engagement": "40,543", "followers": "67,700", "views": "677,169" },
+      "Instagram": { "total_posts": "37", "total_engagement": "16,419", "followers": "13,774", "views": "268,270" },
     },
     Apr: {
       "Facebook": { "total_posts": "100", "total_engagement": "221,369", "followers": "184,230" },
-      "x": { "total_posts": "70", "total_engagement": "60,708", "followers": "1,923" },
       "YouTube": { "total_posts": "56", "total_engagement": "6,009", "followers": "39,200", "views": "164,560" },
-      "Instagram": { "total_posts": "57", "total_engagement": "50,291", "followers": "16,251", "views": "827,604" },
+      "x": { "total_posts": "70", "total_engagement": "60,708", "followers": "1,923" },
       "TikTok": { "total_posts": "36", "total_engagement": "359,795", "followers": "76,151", "views": "6,296,626" },
+      "Instagram": { "total_posts": "57", "total_engagement": "50,291", "followers": "16,251", "views": "827,604" },
     },
     May: {
-      "x": { "total_posts": "47", "total_engagement": "56,022", "followers": "2,111" },
       "Facebook": { "total_posts": "100", "total_engagement": "81,548", "followers": "190,451" },
       "YouTube": { "total_posts": "29", "total_engagement": "1,510", "followers": "39,500", "views": "31,295" },
-      "Instagram": { "total_posts": "30", "total_engagement": "8,438", "followers": "17,026", "views": "252,060" },
+      "x": { "total_posts": "47", "total_engagement": "56,022", "followers": "2,111" },
       "TikTok": { "total_posts": "23", "total_engagement": "21,245", "followers": "80,573", "views": "312,851" },
+      "Instagram": { "total_posts": "30", "total_engagement": "8,438", "followers": "17,026", "views": "252,060" },
     },
     Jun: {
       "Facebook": { "total_posts": "100", "total_engagement": "152,524", "followers": "200,814" },
-      "x": { "total_posts": "54", "total_engagement": "55,288", "followers": "2,493" },
       "YouTube": { "total_posts": "39", "total_engagement": "6,808", "followers": "40,800", "views": "433,333" },
-      "Instagram": { "total_posts": "45", "total_engagement": "48,876", "followers": "18,983", "views": "818,222" },
+      "x": { "total_posts": "54", "total_engagement": "55,288", "followers": "2,493" },
       "TikTok": { "total_posts": "32", "total_engagement": "76,745", "followers": "82,608", "views": "858,838" },
+      "Instagram": { "total_posts": "45", "total_engagement": "48,876", "followers": "18,983", "views": "818,222" },
     },
     Jul: {
-      "x": { "total_posts": "39", "total_engagement": "1,237" },
       "Facebook": { "total_posts": "100", "total_engagement": "78,105" },
       "YouTube": { "total_posts": "29", "total_engagement": "1,237" },
-      "Instagram": { "total_posts": "33", "total_engagement": "11,600" },
+      "x": { "total_posts": "39", "total_engagement": "1,237" },
       "TikTok": { "total_posts": "21", "total_engagement": "13,306" },
+      "Instagram": { "total_posts": "33", "total_engagement": "11,600" },
     },
   },
   "จุฬาฯ": {
     Jan: {
-      "x": { "total_posts": "14", "total_engagement": "68", "followers": "27,619" },
       "Facebook": { "total_posts": "51", "total_engagement": "16,115", "followers": "214,209" },
       "YouTube": { "total_engagement": "0", "followers": "4,700", "views": "0" },
-      "Instagram": { "total_posts": "21", "total_engagement": "1,295", "followers": "8,542", "views": "14,806" },
+      "x": { "total_posts": "14", "total_engagement": "68", "followers": "27,619" },
       "TikTok": { "total_posts": "7", "total_engagement": "420", "followers": "11,610", "views": "10,216" },
+      "Instagram": { "total_posts": "21", "total_engagement": "1,295", "followers": "8,542", "views": "14,806" },
     },
     Feb: {
-      "x": { "total_posts": "11", "total_engagement": "58", "followers": "27,645" },
       "Facebook": { "total_posts": "46", "total_engagement": "11,844", "followers": "214,977" },
       "YouTube": { "total_engagement": "0", "followers": "4,710", "views": "0" },
-      "Instagram": { "total_posts": "29", "total_engagement": "2,283", "followers": "8,934", "views": "6,907" },
+      "x": { "total_posts": "11", "total_engagement": "58", "followers": "27,645" },
       "TikTok": { "total_posts": "5", "total_engagement": "214", "followers": "11,694", "views": "5,387" },
+      "Instagram": { "total_posts": "29", "total_engagement": "2,283", "followers": "8,934", "views": "6,907" },
     },
     Mar: {
-      "x": { "total_posts": "14", "total_engagement": "108", "followers": "27,648" },
       "Facebook": { "total_posts": "57", "total_engagement": "20,174", "followers": "217,325" },
       "YouTube": { "total_engagement": "0", "followers": "4,750", "views": "0" },
-      "Instagram": { "total_posts": "35", "total_engagement": "2,493", "followers": "9,468", "views": "31,610" },
+      "x": { "total_posts": "14", "total_engagement": "108", "followers": "27,648" },
       "TikTok": { "total_posts": "11", "total_engagement": "3,771", "followers": "12,252", "views": "117,686" },
+      "Instagram": { "total_posts": "35", "total_engagement": "2,493", "followers": "9,468", "views": "31,610" },
     },
     Apr: {
-      "x": { "total_posts": "14", "total_engagement": "214", "followers": "27,690" },
       "Facebook": { "total_posts": "49", "total_engagement": "15,669", "followers": "218,711" },
       "YouTube": { "total_engagement": "0", "followers": "4,770", "views": "0" },
-      "Instagram": { "total_posts": "24", "total_engagement": "1,847", "followers": "10,141", "views": "30,143" },
+      "x": { "total_posts": "14", "total_engagement": "214", "followers": "27,690" },
       "TikTok": { "total_engagement": "801", "followers": "12,458", "views": "14,831" },
+      "Instagram": { "total_posts": "24", "total_engagement": "1,847", "followers": "10,141", "views": "30,143" },
     },
     May: {
-      "x": { "total_posts": "11", "total_engagement": "65", "followers": "27,652" },
       "Facebook": { "total_posts": "59", "total_engagement": "24,050", "followers": "220,384" },
       "YouTube": { "total_engagement": "0", "followers": "4,810", "views": "0" },
-      "Instagram": { "total_posts": "27", "total_engagement": "1,304", "followers": "10,577", "views": "14,277" },
+      "x": { "total_posts": "11", "total_engagement": "65", "followers": "27,652" },
       "TikTok": { "total_posts": "7", "total_engagement": "293", "followers": "12,605", "views": "7,246" },
+      "Instagram": { "total_posts": "27", "total_engagement": "1,304", "followers": "10,577", "views": "14,277" },
     },
     Jun: {
-      "x": { "total_posts": "13", "total_engagement": "296", "followers": "27,634" },
       "Facebook": { "total_posts": "50", "total_engagement": "84,013", "followers": "227,491" },
       "YouTube": { "total_posts": "2", "total_engagement": "5", "followers": "4,870", "views": "80" },
-      "Instagram": { "total_posts": "21", "total_engagement": "6,969", "followers": "11,593", "views": "111,211" },
+      "x": { "total_posts": "13", "total_engagement": "296", "followers": "27,634" },
       "TikTok": { "total_posts": "9", "total_engagement": "10,661", "followers": "13,649", "views": "108,076" },
+      "Instagram": { "total_posts": "21", "total_engagement": "6,969", "followers": "11,593", "views": "111,211" },
     },
     Jul: {
-      "x": { "total_posts": "13", "total_engagement": "876" },
       "Facebook": { "total_posts": "50", "total_engagement": "23,776" },
       "YouTube": { "total_engagement": "876" },
-      "Instagram": { "total_posts": "25", "total_engagement": "2,392" },
+      "x": { "total_posts": "13", "total_engagement": "876" },
       "TikTok": { "total_posts": "8", "total_engagement": "11,157" },
+      "Instagram": { "total_posts": "25", "total_engagement": "2,392" },
     },
   },
   "ศิริราช": {
     Jan: {
       "Facebook": { "total_posts": "63", "total_engagement": "15,895", "followers": "263,951" },
-      "x": { "total_posts": "8", "total_engagement": "21", "followers": "17,202" },
       "YouTube": { "total_posts": "4", "total_engagement": "89", "followers": "112,000", "views": "5,940" },
-      "Instagram": { "total_posts": "18", "total_engagement": "1,177", "followers": "10,975", "views": "20,531" },
+      "x": { "total_posts": "8", "total_engagement": "21", "followers": "17,202" },
       "TikTok": { "total_posts": "7", "total_engagement": "386", "followers": "28,922", "views": "50,691" },
+      "Instagram": { "total_posts": "18", "total_engagement": "1,177", "followers": "10,975", "views": "20,531" },
     },
     Feb: {
       "Facebook": { "total_posts": "65", "total_engagement": "34,299", "followers": "264,528" },
-      "x": { "total_posts": "9", "total_engagement": "27", "followers": "17,178" },
       "YouTube": { "total_posts": "4", "total_engagement": "204", "followers": "112,000", "views": "6,658" },
-      "Instagram": { "total_posts": "13", "total_engagement": "1,195", "followers": "11,227", "views": "16,598" },
+      "x": { "total_posts": "9", "total_engagement": "27", "followers": "17,178" },
       "TikTok": { "total_posts": "9", "total_engagement": "6,905", "followers": "29,315", "views": "108,036" },
+      "Instagram": { "total_posts": "13", "total_engagement": "1,195", "followers": "11,227", "views": "16,598" },
     },
     Mar: {
       "Facebook": { "total_posts": "73", "total_engagement": "10,423", "followers": "264,740" },
-      "x": { "total_posts": "7", "total_engagement": "189", "followers": "17,130" },
       "YouTube": { "total_posts": "6", "total_engagement": "158", "followers": "112,000", "views": "4,182" },
-      "Instagram": { "total_posts": "14", "total_engagement": "837", "followers": "11,529", "views": "16,182" },
+      "x": { "total_posts": "7", "total_engagement": "189", "followers": "17,130" },
       "TikTok": { "total_posts": "15", "total_engagement": "2,074", "followers": "29,660", "views": "53,381" },
+      "Instagram": { "total_posts": "14", "total_engagement": "837", "followers": "11,529", "views": "16,182" },
     },
     Apr: {
       "Facebook": { "total_posts": "83", "total_engagement": "32,949", "followers": "266,439" },
-      "x": { "total_posts": "14", "total_engagement": "56", "followers": "17,124" },
       "YouTube": { "total_posts": "5", "total_engagement": "128", "followers": "112,000", "views": "3,266" },
-      "Instagram": { "total_posts": "28", "total_engagement": "4,471", "followers": "12,355", "views": "29,764" },
+      "x": { "total_posts": "14", "total_engagement": "56", "followers": "17,124" },
       "TikTok": { "total_posts": "15", "total_engagement": "4,728", "followers": "30,000", "views": "99,123" },
+      "Instagram": { "total_posts": "28", "total_engagement": "4,471", "followers": "12,355", "views": "29,764" },
     },
     May: {
-      "x": { "total_posts": "9", "total_engagement": "40", "followers": "17,079" },
       "Facebook": { "total_posts": "78", "total_engagement": "18,439", "followers": "267,534" },
       "YouTube": { "total_posts": "6", "total_engagement": "99", "followers": "113,000", "views": "2,855" },
-      "Instagram": { "total_posts": "22", "total_engagement": "5,118", "followers": "12,738", "views": "29,795" },
+      "x": { "total_posts": "9", "total_engagement": "40", "followers": "17,079" },
       "TikTok": { "total_posts": "14", "total_engagement": "2,916", "followers": "30,355", "views": "67,180" },
+      "Instagram": { "total_posts": "22", "total_engagement": "5,118", "followers": "12,738", "views": "29,795" },
     },
     Jun: {
-      "x": { "total_posts": "12", "total_engagement": "106", "followers": "17,037" },
       "Facebook": { "total_posts": "74", "total_engagement": "11,841", "followers": "267,833" },
       "YouTube": { "total_posts": "5", "total_engagement": "120", "followers": "113,000", "views": "3,000" },
-      "Instagram": { "total_posts": "25", "total_engagement": "1,816", "followers": "13,026", "views": "28,755" },
+      "x": { "total_posts": "12", "total_engagement": "106", "followers": "17,037" },
       "TikTok": { "total_posts": "14", "total_engagement": "1,196", "followers": "30,555", "views": "110,476" },
+      "Instagram": { "total_posts": "25", "total_engagement": "1,816", "followers": "13,026", "views": "28,755" },
     },
     Jul: {
-      "x": { "total_posts": "10", "total_engagement": "74" },
       "Facebook": { "total_posts": "75", "total_engagement": "15,198" },
-      "YouTube": { "total_posts": "7", "total_engagement": "74" },
       "Instagram": { "total_posts": "24", "total_engagement": "1,958" },
+      "x": { "total_posts": "10", "total_engagement": "74" },
       "TikTok": { "total_posts": "7", "total_engagement": "398" },
+      "YouTube": { "total_posts": "7", "total_engagement": "74" },
     },
   },
   "สมิติเวช": {
     Jan: {
       "Facebook": { "total_posts": "33", "total_engagement": "46,989", "followers": "297,872" },
-      "x": { "total_posts": "21", "total_engagement": "127,978", "followers": "56,720" },
       "YouTube": { "total_posts": "15", "total_engagement": "4,296", "followers": "186,000", "views": "169,314" },
-      "Instagram": { "total_posts": "10", "total_engagement": "1,134", "followers": "25,608", "views": "3,511" },
+      "x": { "total_posts": "21", "total_engagement": "127,978", "followers": "56,720" },
       "TikTok": { "total_posts": "8", "total_engagement": "1,166", "followers": "45,511", "views": "27,781" },
+      "Instagram": { "total_posts": "10", "total_engagement": "1,134", "followers": "25,608", "views": "3,511" },
     },
     Feb: {
       "Facebook": { "total_posts": "35", "total_engagement": "31,915", "followers": "297,509" },
-      "x": { "total_posts": "19", "total_engagement": "56,930", "followers": "56,952" },
       "YouTube": { "total_posts": "14", "total_engagement": "884", "followers": "187,000", "views": "99,731" },
-      "Instagram": { "total_posts": "9", "total_engagement": "347", "followers": "25,665", "views": "1,969" },
+      "x": { "total_posts": "19", "total_engagement": "56,930", "followers": "56,952" },
       "TikTok": { "total_posts": "12", "total_engagement": "24,902", "followers": "47,066", "views": "469,080" },
+      "Instagram": { "total_posts": "9", "total_engagement": "347", "followers": "25,665", "views": "1,969" },
     },
     Mar: {
       "Facebook": { "total_posts": "33", "total_engagement": "32,859", "followers": "297,604" },
-      "x": { "total_posts": "19", "total_engagement": "97,471", "followers": "57,400" },
       "YouTube": { "total_posts": "15", "total_engagement": "663", "followers": "188,000", "views": "287,246" },
-      "Instagram": { "total_posts": "5", "total_engagement": "214", "followers": "25,742", "views": "3,178" },
+      "x": { "total_posts": "19", "total_engagement": "97,471", "followers": "57,400" },
       "TikTok": { "total_posts": "13", "total_engagement": "10,568", "followers": "48,425", "views": "333,176" },
+      "Instagram": { "total_posts": "5", "total_engagement": "214", "followers": "25,742", "views": "3,178" },
     },
     Apr: {
       "Facebook": { "total_posts": "34", "total_engagement": "19,954", "followers": "297,990" },
-      "x": { "total_posts": "19", "total_engagement": "73,197", "followers": "57,833" },
       "YouTube": { "total_posts": "11", "total_engagement": "520", "followers": "188,000", "views": "26,335" },
-      "Instagram": { "total_posts": "3", "total_engagement": "73", "followers": "25,765", "views": "891" },
+      "x": { "total_posts": "19", "total_engagement": "73,197", "followers": "57,833" },
       "TikTok": { "total_posts": "12", "total_engagement": "1,604", "followers": "49,146", "views": "50,304" },
+      "Instagram": { "total_posts": "3", "total_engagement": "73", "followers": "25,765", "views": "891" },
     },
     May: {
-      "x": { "total_posts": "24", "followers": "57,601" },
       "Facebook": { "total_posts": "29", "followers": "298,102" },
       "YouTube": { "total_posts": "12", "views": "127,180" },
-      "Instagram": { "total_posts": "5", "followers": "25,405", "views": "1,273" },
+      "x": { "total_posts": "24", "followers": "57,601" },
       "TikTok": { "total_posts": "13", "followers": "51,026", "views": "205,014" },
+      "Instagram": { "total_posts": "5", "followers": "25,405", "views": "1,273" },
     },
     Jun: {
-      "x": { "total_posts": "21", "total_engagement": "9,715", "followers": "57,305" },
       "Facebook": { "total_posts": "35", "total_engagement": "21,917", "followers": "298,161" },
       "YouTube": { "total_posts": "12", "total_engagement": "587", "followers": "189,000", "views": "54,769" },
-      "Instagram": { "total_posts": "7", "total_engagement": "390", "followers": "25,469", "views": "0" },
+      "x": { "total_posts": "21", "total_engagement": "9,715", "followers": "57,305" },
       "TikTok": { "total_posts": "11", "total_engagement": "16,399", "followers": "53,717", "views": "461,815" },
+      "Instagram": { "total_posts": "7", "total_engagement": "390", "followers": "25,469", "views": "0" },
     },
     Jul: {
-      "x": { "total_posts": "22", "total_engagement": "140" },
       "Facebook": { "total_posts": "35", "total_engagement": "26,954" },
       "YouTube": { "total_posts": "10", "total_engagement": "140" },
-      "Instagram": { "total_posts": "8", "total_engagement": "411" },
+      "x": { "total_posts": "22", "total_engagement": "140" },
       "TikTok": { "total_posts": "12", "total_engagement": "96,709" },
+      "Instagram": { "total_posts": "8", "total_engagement": "411" },
     },
   },
 };
@@ -2143,6 +2151,7 @@ const TOP_POSTS_PLAT = {
 
 let currentMonth = 'Jul';
 let currentPlatform = 'Facebook';
+let currentEngagementScope = 'All';
 let currentPostPlatform = 'All';
 let chartBrandScore = null;
 let chartEngagement = null;
@@ -2249,6 +2258,24 @@ function getAvailableMonths() {
   return order.filter(m => set.has(m));
 }
 
+function renderEngagementValues(scope = currentEngagementScope) {
+  const label = document.getElementById('engagementValuesLabel');
+  const container = document.getElementById('engagementValues');
+  if (!label || !container) return;
+
+  const scopeLabel = scope === 'All' ? 'รวมทุก Platform' : (PLAT_LABELS[scope] || scope);
+  label.textContent = `ยอดจริงเดือน ${MONTH_TH[currentMonth] || currentMonth} 2026 · ${scopeLabel}`;
+  container.innerHTML = BRANDS.map(b => {
+    const value = scope === 'All'
+      ? ((DATA[b.key] || {})[currentMonth] || {}).total_engagement
+      : (((PLATFORM_DATA[b.key] || {})[currentMonth] || {})[scope] || {}).total_engagement;
+    return `<div class="engagement-value" style="--brand-color:${COLORS[b.key]}">
+      <div class="engagement-value-brand">${b.label}</div>
+      <div class="engagement-value-number">${value || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderCharts() {
   const months = getAvailableMonths();
   const labels = months.map(m => MONTH_TH[m] || m);
@@ -2306,6 +2333,8 @@ function renderCharts() {
       }
     }
   });
+  currentEngagementScope = 'All';
+  renderEngagementValues('All');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2346,6 +2375,7 @@ function renderPlatformTable() {
 
 function selectPlatform(plat) {
   currentPlatform = plat;
+  currentEngagementScope = plat;
   document.querySelectorAll('.plat-tab').forEach(el => {
     el.classList.toggle('active', el.dataset.plat === plat);
   });
@@ -2356,6 +2386,7 @@ function selectPlatform(plat) {
   if (title) title.textContent = `Total Engagement Trend (${PLAT_LABELS[plat]||plat})`;
   if (sub) sub.textContent = 'ยอด Engagement รายเดือน Jan–Jul 2026';
   renderEngagementChartForPlatform(plat);
+  renderEngagementValues(plat);
 }
 
 function renderEngagementChartForPlatform(plat) {
@@ -2472,6 +2503,7 @@ function selectMonth(m) {
   renderBrandCards();
   renderSentiment();
   renderPlatformTable();
+  renderEngagementValues();
   renderTopPosts();
 }
 
