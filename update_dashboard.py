@@ -68,17 +68,53 @@ def regex_total_engagement(rows):
     return None
 
 def extract_overview(month_tabs):
+    def score_and_change(rows, labels):
+        """Read both legacy inline metrics and the newer per-metric sections.
+
+        July's Social Metric export labels the aggregate score "Social Metric
+        Score" and, for some brands, puts each metric in its own section.  Do
+        not treat the informational "on Jul" value as a percentage change.
+        """
+        labels = {label.lower() for label in labels}
+        candidates = []
+        for i, row in enumerate(rows):
+            section = row.get('section', '').lower()
+            item = row.get('item', '')
+            is_inline_label = row.get('item_type') == 'metric_or_label' and item.lower() in labels
+            is_section = row.get('item_type') == 'section_heading' and section in labels
+            if not (is_inline_label or is_section):
+                continue
+            values = []
+            for next_row in rows[i + 1:]:
+                if is_inline_label and next_row.get('item_type') == 'metric_or_label':
+                    break
+                if is_section and next_row.get('item_type') == 'section_heading':
+                    break
+                if next_row.get('item_type') == 'value':
+                    values.append(next_row.get('item', ''))
+            if values:
+                candidates = values
+                break
+        score = next((value for value in candidates
+                      if re.fullmatch(r'[+-]?[\d,]+(?:\.\d+)?', value.strip())), '')
+        change = next((value for value in candidates if '%' in value), '')
+        return score, change
+
     result = {}
     for month in MONTH_ORDER:
         if month not in month_tabs: continue
         rows = month_tabs[month].get('Overview', [])
         if not rows: continue
         d = {}
-        for sec, k1, k2 in [('Brand Score','brand_score','brand_score_change'),
-                              ('Owned Score','owned_score','owned_score_change'),
-                              ('Earned Score','earned_score','earned_score_change'),
-                              ('Sentiment Score','sentiment','sentiment_change')]:
-            v, c = first_two_values(rows, sec)
+        for sec, aliases, k1, k2 in [
+            ('Brand Score', ['Brand Score', 'Social Metric Score'], 'brand_score', 'brand_score_change'),
+            ('Owned Score', ['Owned Score'], 'owned_score', 'owned_score_change'),
+            ('Earned Score', ['Earned Score'], 'earned_score', 'earned_score_change'),
+            ('Sentiment Score', ['Sentiment Score'], 'sentiment', 'sentiment_change'),
+        ]:
+            v, c = score_and_change(rows, aliases)
+            if not v:
+                v, c = first_two_values(rows, sec)
             if v: d[k1] = v; d[k2] = c
         for sec in ['Total Posts','Total Post','Total post']:
             srows = get_section_rows(rows, sec)
