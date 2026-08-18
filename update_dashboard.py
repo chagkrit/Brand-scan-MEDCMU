@@ -170,13 +170,20 @@ def extract_plat_meta(month_tabs):
             plat = TAB_TO_PLAT.get(tab_name)
             if not plat: continue
             pd = {}
-            # YouTube uses "Current subscribers" inside Share section; others use Follower section
+            # The historical exports use a Follower/Subscriber section, while
+            # the July refresh stores the same value in Follower Snapshot
+            # (Owned).  Read either shape so the dashboard remains sourced
+            # solely from the CSV files.
             if plat == 'YouTube':
                 v = first_value_after(rows, 'Share', 'current subscribers')
                 if not v:
                     v = first_value_after(rows, 'Subscriber', 'current subscribers')
+                if not v:
+                    v = first_value_after(rows, 'Follower Snapshot (Owned)', 'followers')
             else:
                 v = first_value_after(rows, 'Follower', 'current followers')
+                if not v:
+                    v = first_value_after(rows, 'Follower Snapshot (Owned)', 'followers')
                 if not v:
                     srows = get_section_rows(rows, 'Follower')
                     vs = [r['item'] for r in srows if r['item_type'] == 'value' and r['item'] != '0']
@@ -238,8 +245,19 @@ def extract_posts(by_month_plat):
 
 def build_platform_fb_data(by_month_plat, chan_eng, plat_meta):
     platform_data, fb_data = {}, {}
+    latest_followers = {}
     for month in MONTH_ORDER:
-        all_plats = set(list(by_month_plat.get(month,{}).keys()) + list(chan_eng.get(month,{}).keys()))
+        # July can contain performance data without a separate follower
+        # section. Carry forward only the latest value already present in the
+        # CSV and retain its month for transparent display in the dashboard.
+        for pl, meta in plat_meta.get(month, {}).items():
+            if meta.get('followers'):
+                latest_followers[pl] = (meta['followers'], month)
+        # Include follower-only platforms too.  A platform with no posts in a
+        # month can still have a valid audience total in the CSV.
+        all_plats = set(list(by_month_plat.get(month,{}).keys())
+                       + list(chan_eng.get(month,{}).keys())
+                       + list(plat_meta.get(month,{}).keys()))
         if not all_plats: continue
         month_plat = {}
         for pl in all_plats:
@@ -249,7 +267,11 @@ def build_platform_fb_data(by_month_plat, chan_eng, plat_meta):
             eng = chan_eng.get(month,{}).get(pl)
             if eng: pd['total_engagement'] = eng
             meta = plat_meta.get(month,{}).get(pl, {})
-            if 'followers' in meta: pd['followers'] = meta['followers']
+            if 'followers' in meta:
+                pd['followers'] = meta['followers']
+                pd['followers_as_of'] = month
+            elif pl in latest_followers:
+                pd['followers'], pd['followers_as_of'] = latest_followers[pl]
             if 'views' in meta: pd['views'] = meta['views']
             if pd: month_plat[pl] = pd
         if month_plat: platform_data[month] = month_plat
