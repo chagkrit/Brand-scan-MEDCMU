@@ -10,6 +10,7 @@ PLAT_TEXT_MAP = {'facebook':'Facebook','Facebook':'Facebook','X':'x','x':'x','Tw
                  'YouTube':'YouTube','youtube':'YouTube'}
 TAB_TO_PLAT = {'Facebook':'Facebook','TikTok':'TikTok','Instagram':'Instagram',
                'YouTube':'YouTube','x':'x','X':'x'}
+PLATFORM_ORDER = ['Facebook', 'TikTok', 'Instagram', 'YouTube', 'x']
 
 def js(v):
     """Safe JS string using json.dumps (handles newlines, backslashes, quotes, Thai etc.)"""
@@ -260,7 +261,8 @@ def build_platform_fb_data(by_month_plat, chan_eng, plat_meta):
                        + list(plat_meta.get(month,{}).keys()))
         if not all_plats: continue
         month_plat = {}
-        for pl in all_plats:
+        for pl in sorted(all_plats, key=lambda p: (PLATFORM_ORDER.index(p)
+                                                    if p in PLATFORM_ORDER else len(PLATFORM_ORDER), p)):
             pd = {}
             posts = by_month_plat.get(month,{}).get(pl, [])
             if posts: pd['total_posts'] = str(len(posts))
