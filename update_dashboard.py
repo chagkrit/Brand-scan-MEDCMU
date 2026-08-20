@@ -163,6 +163,25 @@ def extract_channel_engagement(month_tabs):
     return result
 
 def extract_plat_meta(month_tabs):
+    def follower_value(rows, platform):
+        """Read the audience total from all known ZocialEye CSV layouts.
+
+        July's four source exports use different heading names for the same
+        owned-audience metric.  Keep the values in their original CSV rows;
+        only normalize the extraction here.
+        """
+        sections = ['Follower', 'Followers', 'Owned Channel Followers',
+                    'Owned Follower Snapshot', 'Follower Snapshot (Owned)']
+        if platform == 'YouTube':
+            sections = ['Share', 'Subscriber'] + sections
+        labels = ['current subscribers', 'current followers', 'followers', 'subscribers']
+        for section in sections:
+            for label in labels:
+                value = first_value_after(rows, section, label)
+                if value:
+                    return value
+        return ''
+
     result = {}
     for month in MONTH_ORDER:
         if month not in month_tabs: continue
@@ -171,24 +190,7 @@ def extract_plat_meta(month_tabs):
             plat = TAB_TO_PLAT.get(tab_name)
             if not plat: continue
             pd = {}
-            # The historical exports use a Follower/Subscriber section, while
-            # the July refresh stores the same value in Follower Snapshot
-            # (Owned).  Read either shape so the dashboard remains sourced
-            # solely from the CSV files.
-            if plat == 'YouTube':
-                v = first_value_after(rows, 'Share', 'current subscribers')
-                if not v:
-                    v = first_value_after(rows, 'Subscriber', 'current subscribers')
-                if not v:
-                    v = first_value_after(rows, 'Follower Snapshot (Owned)', 'followers')
-            else:
-                v = first_value_after(rows, 'Follower', 'current followers')
-                if not v:
-                    v = first_value_after(rows, 'Follower Snapshot (Owned)', 'followers')
-                if not v:
-                    srows = get_section_rows(rows, 'Follower')
-                    vs = [r['item'] for r in srows if r['item_type'] == 'value' and r['item'] != '0']
-                    v = vs[0] if vs else ''
+            v = follower_value(rows, plat)
             if v and v != '0': pd['followers'] = v
             v2 = first_value_after(rows, 'Views', 'current month')
             if not v2:
